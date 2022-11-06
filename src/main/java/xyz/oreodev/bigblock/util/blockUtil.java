@@ -2,12 +2,21 @@ package xyz.oreodev.bigblock.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.oreodev.bigblock.BigBlock;
 import xyz.oreodev.bigblock.enums.blockType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class blockUtil {
     private final BigBlock plugin = JavaPlugin.getPlugin(BigBlock.class);
+
     public void generateBlock(int blockX, int blockY, int blockZ, blockType type) {
         int nX = blockX * 16;
         int nY = blockY * 16;
@@ -30,4 +39,58 @@ public class blockUtil {
         }
     }
 
+    List<Player> playerList = new ArrayList<>();
+
+    public int taskId;
+
+    public void runTask(Player player) {
+        if (playerList.contains(player)) {
+            playerList.remove(player);
+            return;
+        }
+        else playerList.add(player);
+        taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+            @Override
+            public void run() {
+                if (playerList.size() == 0) Bukkit.getScheduler().cancelTasks(plugin);
+                Bukkit.getConsoleSender().sendMessage("tick! " + playerList);
+                if (!player.getTargetBlock(120).isEmpty()) {
+                    Location loc = player.getTargetBlock(120).getLocation();
+                    loc.add(0.5, 0, 0.5);
+                    BlockFace face = player.rayTraceBlocks(120).getHitBlockFace();
+                    player.sendMessage(face.toString());
+                    switch (face) {
+                        case UP:
+                            loc.add(0,1,0);
+                            break;
+                        case DOWN:
+                            loc.add(0,-1,0);
+                            break;
+                        case EAST:
+                            loc.add(1,0,0);
+                            break;
+                        case NORTH:
+                            loc.add(0,0,-1);
+                            break;
+                        case WEST:
+                            loc.add(-1,0,0);
+                            break;
+                        case SOUTH:
+                            loc.add(0,0,1);
+                            break;
+                        default:
+                            break;
+                    }
+                    spawnFb(loc);
+                }
+            }
+        }, 0, 10);
+    }
+
+    public void spawnFb(Location loc) {
+        FallingBlock fb = Bukkit.getWorld("world").spawnFallingBlock(loc, Material.RED_STAINED_GLASS, (byte) 0);
+        fb.setGlowing(true);
+        fb.setGravity(false);
+        Bukkit.getScheduler().runTaskLater(plugin, fb::remove, 10);
+    }
 }
