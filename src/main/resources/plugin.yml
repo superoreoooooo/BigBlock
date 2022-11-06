@@ -1,0 +1,6 @@
+name: BigBlock
+version: '${project.version}'
+main: xyz.oreodev.bigblock.BigBlock
+api-version: 1.19
+commands:
+  r:
