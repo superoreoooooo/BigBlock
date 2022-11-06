@@ -1,4 +1,7 @@
 package xyz.oreodev.bigblock.listener;
 
-public class wandListener {
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class wandListener implements Listener {
 }
